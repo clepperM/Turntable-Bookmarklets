@@ -226,7 +226,12 @@
 					float: 'left',
 					marginRight: '5px',
 				}).click(function(){
-					 turntable.playlist.addSong({
+					if (turntable.playlist.songsByFid[song.fileId]) {
+						alert('This song is already in your playlist');
+						return;
+					}
+					
+					turntable.playlist.addSong({
                		 	fileId: song.fileId,
 		                metadata: song.d
 		            });
