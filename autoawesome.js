@@ -12,6 +12,42 @@
         } 
     }
 
+	if(ttObj === null){
+		alert('Couldn\'t auto find the roommanger object.');
+		return;
+	}
+	
+	var botMessage = $('<div id="bot-message"><span>Waiting for first run..</span><br/><br/><a href="#" style="color: #FFF">Stop the bot</a></div>');
+    botMessage.css({
+        position: 'fixed',
+        background: "rgba(0, 0, 0, 0.8)",
+        color: 'white',
+        fontSize: '14px',
+        width: '200px',
+        top: '20px',
+        left: '50%',
+        marginLeft: '-100px',
+        zIndex: '5000',
+        textAlign: 'center',
+        padding: '10px'
+    });
+    
+    if(!$('#bot-message').length){
+        $('body').append(botMessage);
+        
+        botMessage.find('a').click(function(e){
+            e.preventDefault();
+            
+            clearInterval(botAutoAwesomeTimer);
+            botAutoAwesomeTimer = null;
+            
+            clearInterval(botCountdownTimer);
+            botCountdownTimer = null;
+            
+            botMessage.remove();
+        });
+    }
+    
     function danceParty(){        
         clearInterval(botCountdownTimer);
         botCountdownTimer = null;
