@@ -5,19 +5,21 @@
     
     var ttObj = null;
     
+	//Attempt to find the room manager object
     for (var prop in window) { 
         if (window.hasOwnProperty(prop) && window[prop] instanceof roommanager){ 
             ttObj = window[prop];
             break;
         } 
     }
-
+	
+	//Did we do good?
 	if(ttObj === null){
 		alert('Couldn\'t auto find the roommanger object.');
 		return;
 	}
 	
-	var botMessage = $('<div id="bot-message"><span>Waiting for first run..</span><br/><br/><a href="#" style="color: #FFF">Stop the bot</a></div>');
+	var botMessage = $('<div id="bot-message"><span>Starting Up..</span><br/><br/><a href="#" style="color: #FFF">Stop the bot</a></div>');
     botMessage.css({
         position: 'fixed',
         background: "rgba(0, 0, 0, 0.8)",
@@ -31,7 +33,8 @@
         textAlign: 'center',
         padding: '10px'
     });
-    
+
+	//Append the bot message overlay
     if(!$('#bot-message').length){
         $('body').append(botMessage);
         
@@ -48,33 +51,35 @@
         });
     }
     
+	//Update the message countdown timer
+	function countdown(first){
+		first = first || '';
+		
+		var botCountdownFrom = botInterval / 1000;   
+		botCountdownTimer = null;
+		
+		botCountdownTimer = setInterval(function(){
+            if(botCountdownFrom <= 0){ botCountdownFrom = botInterval / 1000; }
+            
+            botMessage.find('span').html(first + 'Autoawesome in ' + botCountdownFrom + ' seconds');
+            
+            botCountdownFrom--;
+        }, 1000);	
+	}
+	
+	//Trigger the upvote
     function danceParty(){        
         clearInterval(botCountdownTimer);
-        botCountdownTimer = null;
-        
-        var botCountdownFrom = botInterval / 1000;    
-        var botRandomIndex = Math.floor(Math.random() * botChatMessages.length);    
-        var botChatMessage = botChatMessages[botRandomIndex] || null;
         
         ttObj.callback('upvote'); 
         
-        if(botChatMessage !== '' && botChatMessage){
-            chatFunction({
-            	api: "room.speak",
-            	roomid: TURNTABLE_ROOMID,
-            	text: botChatMessage
-            });
-        }
-        
-        botCountdownTimer = setInterval(function(){
-            if(botCountdownFrom <= 0){ botCountdownFrom = botInterval / 1000; }
-            
-            botMessage.find('span').html('Autoawesome in%20' + botCountdownFrom + '%20seconds');
-            
-            botCountdownFrom--;
-        }, 1000);
+        countdown();
     }
     
+	//Kick off the timer
+	countdown('First ');
+	
+	//Start the awesome timer
     var botAutoAwesomeTimer = setInterval(function(){        
         danceParty();
     }, botInterval);
