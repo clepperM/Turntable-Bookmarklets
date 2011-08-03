@@ -129,7 +129,6 @@
     }
    
    function handleSearch(res){
-		console.log('done');
 		$('#fl-results .album').remove();
 
         if(!res.success || !res.docs.length){
@@ -257,16 +256,13 @@
 				});
 				
 				songHTML.find('.song').css({
-					
+					//Doing something here
 				});
 				
 				albumHTML.find('ul').append(songHTML);
 			});
 			
-			//console.log(albumHTML);
 			$('#fl-results').append(albumHTML);
-		}
-			
+		}		
    }
-
 })();
