@@ -32,6 +32,7 @@
                     'getSetting',
                     'setSetting'];
 
+	//Attempt to get the API function by the process of elimination
 	for(var key in turntable){
         var prop = turntable[key];
         
@@ -52,16 +53,18 @@
         }   
     }
 	
+	//Did we do good?
 	if(apiFunction == null){
 		alert('Couldn\'t Find the API Function');
 		return;
 	}
     
-    var searchBox = $('<div class="overlay">\
+	//Build and style the search overlay
+    var searchBox = $('<div class="overlay" style="position: fixed">\
 	<div id="fl-search-container" class="modal">\
 		<div class="close-x"></div>\
 		<div id="fl-overflow" style="overflow: auto; height: 400px">\
-			<div id="fl-results"><h3 id="fl-waiting">Enter you search above</h3></div>\
+			<div id="fl-results"><h3 id="fl-waiting"><br/>Enter your search above</h3></div>\
 		</div>\
 	</div>\
 	</div>');
@@ -127,16 +130,17 @@
    
    function handleSearch(res){
 		console.log('done');
-		
-		$('#fl-results').find('h3').remove();
-        $('#fl-results .album').remove();
-        
-        if(!res.success){
-            alert('Could not find any results');
+		$('#fl-results .album').remove();
+
+        if(!res.success || !res.docs.length){
+			$('#fl-results').find('h3').text('Could not find any results');
+			return;
         }
+		
+       	$('#fl-results').find('h3').remove();
         
         var results = res.docs;
-
+		
         turntable.removeEventListener("message", handleSearch);
 			
  		var albums = {};
@@ -160,17 +164,7 @@
 				song: data.song,
 				duration:  Math.floor(data.length / 60) + ":" + String(data.length % 60 + 100).substr(1),
 				d: data
-			});			
-			/*
-            var res_html = $('<li><img src="' + art + '" alt="' + album + '"/></li>');
-            
-            res_html.css({
-                listStyle: 'none',
-                width: '100%',
-                textAlign: 'left',
-            });*/
-
-            //$('#fl-results').append(res_html);
+			});
         }
 		
 		for(var album in albums){
