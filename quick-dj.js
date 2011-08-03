@@ -1,83 +1,10 @@
 (function(){
-    var botAutoAwesomeTimer = null;
-    var botCountdownTimer = null;
-    var running = true;
-    var botInterval = 2.5 * 60 * 1000;
+	var checkEvery = 1 * 1000;
+	var ttObj = null;
+    var botTimer = null;
     
-    var ttObj = null;
-    var chatFunction = null;
-    
-    for (var prop in window) { 
-        if (window.hasOwnProperty(prop) && window[prop] instanceof roommanager) { 
-            ttObj = window[prop];
-            break;
-        } 
-    }
-    
-    var chatProps = ['main',
-                    'flushUnsentMessages',
-                    'setSocketAddr',
-                    'initIdleChecker',
-                    'idleTime',
-                    'checkIdle',
-                    'socketReconnected',
-                    'pingSocket',
-                    'closeSocket',
-                    'addEventListener',
-                    'removeEventListener',
-                    'dispatchEvent',
-                    'addIdleListener',
-                    'removeIdleListener',
-                    'setPage',
-                    'reloadPage',
-                    'hashMod',
-                    'getHashedAddr',
-                    'whenSocketConnected',
-                    'messageReceived',
-                    'randomRoom',
-                    'showWelcome',
-                    'die',
-                    'showAlert',
-                    'showOverlay',
-                    'hideOverlay',
-                    'serverNow',
-                    'seedPRNG',
-                    'getSetting',
-                    'setSetting'];
-
-    for(var key in turntable){
-        var prop = turntable[key];
-        
-        if(typeof(prop) !== 'function'){ continue; }
-        
-        var inArray = false;
-        
-        for(var index in chatProps){
-            var funcName = chatProps[index];
-            
-            if(key == funcName){ inArray = true; }
-        }     
-        
-        if(!inArray){
-            chatFunction = prop;
-            
-            break;
-        }   
-    }
-    
-    var botChatMessages = [
-        "Holy fuck, this song rocks so much! AWESOMED'd!",
-        "If this were a person I would smell it's hair. Awesomed!",
-        "What were you thinking? Cause THIS. IS. AWESOME!",
-        "I like the way your breasts look. +1",
-        "I'm a bot, and this is what I was designed to do, Awesome++",
-        "'Member that time you did that thing for me? AWESOMED!",
-        "This song.. Man it brings me back.",
-        "",
-    ];
-    
-    var botMessage = $('<div id="bot-message"><span>Waiting for first run..</span><br/><br/><a href="#" style="color: #FFF">Stop the bot</a></div>');
-    botMessage.css({
+    var waitingBox = $('<div id="bot-waiting-box">Waiting for a DJ Spot to open up</div>');
+    waitingBox.css({
         position: 'fixed',
         background: "rgba(0, 0, 0, 0.8)",
         color: 'white',
@@ -91,52 +18,53 @@
         padding: '10px'
     });
     
-    if(!$('#bot-message').length){
-        $('body').append(botMessage);
-        
-        botMessage.find('a').click(function(e){
-            e.preventDefault();
-            
-            clearInterval(botAutoAwesomeTimer);
-            botAutoAwesomeTimer = null;
-            
-            clearInterval(botCountdownTimer);
-            botCountdownTimer = null;
-            
-            botMessage.remove();
-        });
+    if(!$('#bot-waiting-box').length){
+        $('body').append(waitingBox);
     }
     
-    function danceParty(){
-        if(!running){ return; }
+    for (var prop in window) { 
+        if (window.hasOwnProperty(prop) && window[prop] instanceof roommanager) { 
+            ttObj = window[prop];
+            break;
+        } 
+    }
+    
+    if(!ttObj){ alert('Couldn\'t Auto find the roommanager object'); return; }
+    
+    var myUID = ttObj.myuserid;
+    
+    if(myUID in ttObj.djs_uid){ 
+        alert('You are already DJing');
+        waitingBox.remove().hide();
         
-        clearInterval(botCountdownTimer);
-        botCountdownTimer = null;
+        clearInterval(botTimer);
+        botTimer = null;
         
-        var botCountdownFrom = botInterval / 1000;    
-        var botRandomIndex = Math.floor(Math.random() * botChatMessages.length);    
-        var botChatMessage = botChatMessages[botRandomIndex] || null;
+        return;
+    }
+
+    function objLength(obj){
+        var len = 0;
         
-        ttObj.callback('upvote'); 
-        
-        if(botChatMessage !== '' && botChatMessage){
-            chatFunction({
-            	api: "room.speak",
-            	roomid: TURNTABLE_ROOMID,
-            	text: botChatMessage
-            });
+        for(var key in obj){
+            len++;
         }
         
-        botCountdownTimer = setInterval(function(){
-            if(botCountdownFrom <= 0){ botCountdownFrom = botInterval / 1000; }
-            
-            botMessage.find('span').html('Autoawesome in%20' + botCountdownFrom + '%20seconds');
-            
-            botCountdownFrom--;
-        }, 1000);
+        return len;
     }
     
-    var botAutoAwesomeTimer = setInterval(function(){        
-        danceParty();
-    }, botInterval);
+    botTimer = setInterval(function(){        
+        if(objLength(ttObj.djs_uid) < 5){
+           ttObj.callback("become_dj", ttObj.become_dj.data("spot"));
+           
+           if(myUID in ttObj.djs_uid){
+               clearInterval(botTimer);
+               botTimer = null;
+               
+               waitingBox.hide().remove();
+               
+               alert('You\'re now DJing');
+           }
+        }
+    }, checkEvery);
 })();
